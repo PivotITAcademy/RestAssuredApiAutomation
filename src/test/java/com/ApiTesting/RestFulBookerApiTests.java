@@ -1,21 +1,22 @@
 package com.ApiTesting;
 
-import org.hamcrest.core.IsNot;
+import static io.restassured.RestAssured.baseURI;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.github.javafaker.Faker;
-import com.google.gson.JsonObject;
+//import com.google.gson.JsonObject;
 
+//import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.response.Response;
 import pojo.BookingDates;
 import pojo.CreateBookingRequest;
-
-import static io.restassured.RestAssured.*;
-//To use hamcrest matchers add below 2 imports
-import static io.restassured.matcher.RestAssuredMatchers.*;
-import static org.hamcrest.Matchers.*;
 
 /*
  * Given i have the baseurl, headers, params, request body
@@ -137,5 +138,23 @@ public class RestFulBookerApiTests {
 		Assert.assertEquals(response.getBody().jsonPath().getDouble("booking.totalprice"), createBookingRequest.getPrice());
 		Assert.assertTrue(response.getBody().jsonPath().getBoolean("booking.depositpaid"));
 		Assert.assertEquals(response.getBody().jsonPath().getString("booking.additionalneeds"), createBookingRequest.getAdditionalneeds());
+	}
+	
+	@Test
+	public void testUpdateBookingSchema() {
+		String schemaName = "createBookingResponseSchema.json";
+		CreateBookingRequest createBookingRequest = new CreateBookingRequest();
+		
+		createBookingRequest.setFirstname(faker.name().firstName());
+		createBookingRequest.setLastname(faker.name().lastName());
+		createBookingRequest.setPrice(111);
+		createBookingRequest.setDepositpaid(true);
+		createBookingRequest.setBookingDates(new BookingDates("2018-01-01", "2018-01-05"));
+		createBookingRequest.setAdditionalneeds("breakfast");
+//		File file = new File("src/test/resources/schemas/createBookingResponseSchema.json");
+		
+//		given().basePath("booking").header("Content-Type", "application/json").body(createBookingRequest).log().all()
+//		.when().post().then().log().all().body(JsonSchemaValidator.matchesJsonSchema(file));
+		
 	}
 }
