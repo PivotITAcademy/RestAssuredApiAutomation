@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.github.javafaker.Faker;
 
-import io.restassured.module.jsv.JsonSchemaValidator;
+
 import io.restassured.response.Response;
 import pojo.BookingDates;
 import pojo.CreateBookingRequest;
@@ -19,9 +19,10 @@ import utils.TokenGenerator;
 public class RestfulBookerAPIWithAuth {
 
 	Faker faker = new Faker();
-	Response response ;
+	
 	CreateBookingRequest createBookingRequest = new CreateBookingRequest();
-
+	TestContext context = new TestContext();
+	
 	@BeforeMethod
 	public void setup() {
 		// Set the base url
@@ -36,20 +37,20 @@ public class RestfulBookerAPIWithAuth {
 		System.out.println(token);
 		
 		//Create a booking and extract Booking id
-		String bookingid = createBooking();
+		createBooking();
 		
 		createBookingRequest.setFirstname("vishnu");
 		
 		//Call the update API - updateBookingResponseSchema.json
 		 given().basePath("booking").header("Content-Type","application/json").header("Accept","application/json").header("Cookie","token="+token)
-					.pathParam("id", bookingid).body(createBookingRequest).log().all().when().put("/{id}").then().log().all().statusCode(200).
+					.pathParam("id", context.bookingId).body(createBookingRequest).log().all().when().put("/{id}").then().log().all().statusCode(200).
 					body("firstname", equalTo(createBookingRequest.getFirstname()));
 		
 		
 	}
 	
 	
-	public String createBooking() {
+	public void createBooking() {
 		
 		String bookingid =null;
 		
@@ -62,12 +63,12 @@ public class RestfulBookerAPIWithAuth {
 		createBookingRequest.setBookingDates(new BookingDates("2018-01-01", "2018-01-05"));
 		createBookingRequest.setAdditionalneeds("breakfast");
 		
-	 	 response = given().basePath("booking").header("Content-Type","application/json").header("Accept","application/json").body(createBookingRequest).log().all().when().post();
+		context.response = given().basePath("booking").header("Content-Type","application/json").header("Accept","application/json").body(createBookingRequest).log().all().when().post();
 	 	
-	 	 System.out.println("Create booking response : "+response.asPrettyString());
+	 	 System.out.println("Create booking response : "+context.response.asPrettyString());
 	 	 
-	 	bookingid = response.getBody().jsonPath().getString("bookingid");
+	 	context.bookingId = context.response.getBody().jsonPath().getString("bookingid");
 	 			
-		return bookingid;
+		
 	}
 }
